@@ -11,18 +11,34 @@ public class LinkUdemy implements Serializable,Comparable<LinkUdemy>{
     @Column(name = "id")
     private Long id;
 
+    @Column
+    private String nameCourses;
+
     @Column(name = "url")
     private String url;
 
     @Column(name = "number_discount")
     private Long numberOfDiscount;
 
-    public LinkUdemy(String url, Long numberOfDiscount) {
+    @Column(name = "is_enroll")
+    private Boolean isEnroll;
+
+    public LinkUdemy(String url, Long numberOfDiscount, String nameCourses) {
         this.url = url;
         this.numberOfDiscount = numberOfDiscount;
+        this.isEnroll = false;
+        this.nameCourses =  nameCourses;
     }
 
     public LinkUdemy() {
+    }
+
+    public String getNameCourses() {
+        return nameCourses;
+    }
+
+    public void setNameCourses(String nameCourses) {
+        this.nameCourses = nameCourses;
     }
 
     public Long getId() {
@@ -57,5 +73,13 @@ public class LinkUdemy implements Serializable,Comparable<LinkUdemy>{
     @Override
     public int compareTo(LinkUdemy linkUdemy) {
         return this.url.compareTo(linkUdemy.getUrl());
+    }
+
+    public Boolean getEnroll() {
+        return isEnroll;
+    }
+
+    public void setEnroll(Boolean enroll) {
+        isEnroll = enroll;
     }
 }

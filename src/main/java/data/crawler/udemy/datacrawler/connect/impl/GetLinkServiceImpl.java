@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
+import java.util.*;
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -60,7 +61,7 @@ public class GetLinkServiceImpl implements GetLinkService {
         Set<LinkUdemy> linkUdemys = new TreeSet<>();
         LinkUdemy linkUdemy = null;
 
-        for (int i = 0; i <= 10 ; i++) {
+        for (int i = 0; i <= total ; i++) {
             String url = sourceUrl+i;
             System.out.println("Starting get value from "+url +" .......................");
             Document document = Jsoup.connect(url).userAgent("Mozilla").timeout(50000).get();
@@ -76,11 +77,13 @@ public class GetLinkServiceImpl implements GetLinkService {
                     } catch (NumberFormatException ex) {
                         ex.printStackTrace();
                     }
-                    linkUdemy = new LinkUdemy(link,numberOfDiscount);
+                    String nameCourse = element.select(".entry-title a").text();
+                    linkUdemy = new LinkUdemy(link, numberOfDiscount, nameCourse);
                     linkUdemys.add(linkUdemy);
                 }
             }
         }
+        linkUdemys = correctLink(linkUdemys);
         return linkUdemys;
     }
 
@@ -88,5 +91,36 @@ public class GetLinkServiceImpl implements GetLinkService {
     public LinkUdemy saveALink(LinkUdemy linkUdemy) {
         LinkUdemy linkUdemyResult = linkUdemyRepository.save(linkUdemy);
         return linkUdemyRepository.save(linkUdemy);
+    }
+
+    @Override
+    public List<LinkUdemy> saveAll(List<LinkUdemy> linkUdemies) {
+        linkUdemyRepository.saveAll(linkUdemies);
+        return null;
+    }
+
+    @Override
+    public Set<LinkUdemy> correctLink(Set<LinkUdemy> linkUdemies) {
+        Iterator iterator = linkUdemies.iterator();
+        LinkUdemy linkUdemy = null;
+        while (iterator.hasNext()){
+            linkUdemy = (LinkUdemy) iterator.next();
+            Document document = getDocument(linkUdemy.getUrl());
+            if(document != null) {
+                String newUrl = document.select(".link-holder a").attr("href");
+                linkUdemy.setUrl(newUrl);
+                System.out.println(newUrl);
+            }
+        }
+        return linkUdemies;
+    }
+
+    public Document getDocument(String url) {
+        try {
+            return Jsoup.connect(url).userAgent("Mozilla").timeout(50000).get();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
     }
 }
